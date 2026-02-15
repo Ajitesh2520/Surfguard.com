@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "@types/chrome": "^0.1.36",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6"
+  },
+  "dependencies": {
+    "openai": "^6.21.0"
+  }
+}
