@@ -28,6 +28,25 @@ export async function isLimitExceeded(category: string): Promise<boolean> {
   return usage[category] >= limits[category];
 }
 
+export async function resetDailyState() {
+  // Clear usage
+  await chrome.storage.local.set({
+    categoryUsage: {},
+    blockedCategories: {}
+  });
+
+  // Remove all dynamic blocking rules
+  const rules = await chrome.declarativeNetRequest.getDynamicRules();
+  const ruleIds = rules.map(rule => rule.id);
+
+  if (ruleIds.length > 0) {
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: ruleIds
+    });
+  }
+
+  console.log("Daily reset completed.");
+}
 
 export async function blockCategory(category: string) {
   const { categoryDomains = {} } = await chrome.storage.local.get("categoryDomains");
