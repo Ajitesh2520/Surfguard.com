@@ -14,6 +14,7 @@ export async function getCategoryLimits() {
   return categoryLimits as Record<string, number>;
 }
 
+
 export async function getCategoryUsage() {
   const { categoryUsage = {} } = await chrome.storage.local.get("categoryUsage");
   return categoryUsage as Record<string, number>;
@@ -48,4 +49,13 @@ export async function blockCategory(category: string) {
     removeRuleIds: rules.map(r => r.id),
     addRules: rules
   });
+
+  await chrome.storage.local.set({
+    blockedCategories: {
+      ...((await chrome.storage.local.get("blockedCategories")).blockedCategories || {}),
+      [category]: true
+    }
+  });
 }
+
+

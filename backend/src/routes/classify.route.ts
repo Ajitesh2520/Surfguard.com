@@ -12,8 +12,10 @@ router.post("/classify-url", async (req, res) => {
 
   try {
     const category = await classifyDomain(domain);
+    res.status(350).json({errot:"Exit here"})
     res.json({ category });
   } catch (err) {
+    
     res.status(500).json({ category: "Uncategorized" });
   }
 });

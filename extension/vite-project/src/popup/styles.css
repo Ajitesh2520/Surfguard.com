@@ -1,0 +1,50 @@
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+  width: 340px;
+  background: #0f0f0f;
+  color: white;
+}
+
+.container {
+  padding: 16px;
+}
+
+h1 {
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+section {
+  margin-bottom: 18px;
+}
+
+input {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+  background: #1c1c1c;
+  color: white;
+}
+
+button {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.usage-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
