@@ -3,6 +3,7 @@
   "name": "SurfGuard",
   "version": "0.1.0",
   "description": "AI-powered browser focus agent",
+  "permissions": ["tabs", "storage"],
   "action": {
     "default_popup": "popup.html",
     "default_title": "SurfGuard"

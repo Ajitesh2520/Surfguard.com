@@ -81,3 +81,11 @@ export type FocusSessionResponse = {
 export type FocusSessionListResponse = {
   sessions: FocusSession[];
 };
+
+export type BrowserActivityEvent = {
+  url: string;
+  domain: string;
+  title: string | null;
+  timestamp: string;
+  tabId: number;
+};

@@ -5,6 +5,7 @@ import { defineConfig, build } from "vite";
 import type { Plugin } from "vite";
 
 const dir = dirname(fileURLToPath(import.meta.url));
+const shared = resolve(dir, "../../packages/shared/src/index.ts");
 
 function bundleBackground(): Plugin {
   return {
@@ -13,6 +14,11 @@ function bundleBackground(): Plugin {
       await build({
         configFile: false,
         logLevel: "error",
+        resolve: {
+          alias: {
+            "@surfguard/shared": shared,
+          },
+        },
         build: {
           emptyOutDir: false,
           outDir: resolve(dir, "dist"),
@@ -39,6 +45,11 @@ function bundleBackground(): Plugin {
 
 export default defineConfig({
   base: "./",
+  resolve: {
+    alias: {
+      "@surfguard/shared": shared,
+    },
+  },
   plugins: [bundleBackground()],
   build: {
     outDir: "dist",
