@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum GoalCategory {
+  STUDY
+  CODING
+  INTERVIEW_PREP
+  RESEARCH
+  WORK
+  WRITING
+  READING
+  ENTERTAINMENT
+  GENERAL
+}
+
+enum SessionStrictness {
+  RELAXED
+  BALANCED
+  STRICT
+}
+
+enum SessionStatus {
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+enum Decision {
+  ALLOW
+  NUDGE
+  WARN
+  BLOCK
+}
+
+enum ClassificationSource {
+  RULE
+  CACHE
+  AI
+}
+
+enum InterventionKind {
+  NUDGE
+  WARN
+  BLOCK
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  preference     UserPreference?
+  goals          Goal[]
+  focusSessions  FocusSession[]
+  browsingEvents BrowsingEvent[]
+  interventions  Intervention[]
+
+  @@map("users")
+}
+
+model UserPreference {
+  id                String            @id @default(cuid())
+  userId            String            @unique
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  defaultStrictness SessionStrictness @default(BALANCED)
+  timezone          String            @default("UTC")
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@map("user_preferences")
+}
+
+model Goal {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  category    GoalCategory
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  focusSessions FocusSession[]
+
+  @@index([userId, isActive])
+  @@index([category])
+  @@map("goals")
+}
+
+model FocusSession {
+  id         String            @id @default(cuid())
+  userId     String
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goalId     String
+  goal       Goal              @relation(fields: [goalId], references: [id], onDelete: Restrict)
+  strictness SessionStrictness @default(BALANCED)
+  status     SessionStatus     @default(ACTIVE)
+  startedAt  DateTime          @default(now())
+  endedAt    DateTime?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  browsingEvents BrowsingEvent[]
+  interventions  Intervention[]
+
+  @@index([userId, status])
+  @@index([goalId])
+  @@index([startedAt])
+  @@map("focus_sessions")
+}
+
+model BrowsingEvent {
+  id             String        @id @default(cuid())
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  focusSessionId String?
+  focusSession   FocusSession? @relation(fields: [focusSessionId], references: [id], onDelete: SetNull)
+  url            String
+  domain         String
+  title          String?
+  occurredAt     DateTime      @default(now())
+  createdAt      DateTime      @default(now())
+
+  classification Classification?
+  intervention   Intervention?
+
+  @@index([userId, occurredAt])
+  @@index([focusSessionId, occurredAt])
+  @@index([domain])
+  @@map("browsing_events")
+}
+
+model Classification {
+  id              String               @id @default(cuid())
+  browsingEventId String               @unique
+  browsingEvent   BrowsingEvent        @relation(fields: [browsingEventId], references: [id], onDelete: Cascade)
+  decision        Decision
+  relevant        Boolean
+  confidence      Float?
+  source          ClassificationSource
+  reason          String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@index([decision, source])
+  @@map("classifications")
+}
+
+model Intervention {
+  id              String           @id @default(cuid())
+  userId          String
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  focusSessionId  String?
+  focusSession    FocusSession?    @relation(fields: [focusSessionId], references: [id], onDelete: SetNull)
+  browsingEventId String?          @unique
+  browsingEvent   BrowsingEvent?   @relation(fields: [browsingEventId], references: [id], onDelete: SetNull)
+  kind            InterventionKind
+  message         String?
+  createdAt       DateTime         @default(now())
+
+  @@index([userId, createdAt])
+  @@index([focusSessionId])
+  @@index([kind])
+  @@map("interventions")
+}

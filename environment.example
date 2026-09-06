@@ -2,5 +2,6 @@
 # API: apps/api/.env
 # Web: apps/web/.env
 
-PORT=4000
-VITE_API_URL=http://localhost:4000
+PORT=4001
+DATABASE_URL=postgresql://surfguard:surfguard@localhost:5432/surfguard?schema=public
+VITE_API_URL=http://localhost:4001
