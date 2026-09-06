@@ -37,6 +37,7 @@ test("register → login → /me → logout → /me rejected", async () => {
   assert.equal(login.status, 200);
   assert.equal(login.body.user.email, email);
   assert.equal(login.body.user.passwordHash, undefined);
+  assert.equal(typeof login.body.token, "string");
   assert.match(String(login.headers["set-cookie"]), /surfguard_session=/);
 
   const me = await agent.get("/api/auth/me");

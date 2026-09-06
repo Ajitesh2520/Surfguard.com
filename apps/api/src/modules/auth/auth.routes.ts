@@ -32,7 +32,7 @@ export function createAuthRouter(authService: AuthService): Router {
         req.body.password as string,
       );
       setSessionCookie(res, token);
-      res.json({ user });
+      res.json({ user, token });
     }),
   );
 

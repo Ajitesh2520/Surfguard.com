@@ -6,6 +6,7 @@ import { GoalsPage } from "./pages/GoalsPage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import { ActivityPage } from "./pages/ActivityPage";
 import { SessionsPage } from "./pages/SessionsPage";
 import { AppShell } from "./shell/AppShell";
 
@@ -21,6 +22,7 @@ export function App() {
         <Route path="/goals/:id" element={<GoalDetailPage />} />
         <Route path="/goals/:id/edit" element={<GoalEditPage />} />
         <Route path="/sessions" element={<SessionsPage />} />
+        <Route path="/activity" element={<ActivityPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

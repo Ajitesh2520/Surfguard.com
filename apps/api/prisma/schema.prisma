@@ -145,6 +145,7 @@ model BrowsingEvent {
   url            String
   domain         String
   title          String?
+  tabId          Int?
   occurredAt     DateTime      @default(now())
   createdAt      DateTime      @default(now())
 

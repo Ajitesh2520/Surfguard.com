@@ -13,6 +13,12 @@ export function sessionCookieOptions(): CookieOptions {
 }
 
 export function readSessionToken(req: Request): string | undefined {
+  const header = req.headers.authorization;
+  if (typeof header === "string" && header.startsWith("Bearer ")) {
+    const bearer = header.slice("Bearer ".length).trim();
+    if (bearer) return bearer;
+  }
+
   const value = req.cookies?.[getAuthConfig().cookieName];
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }

@@ -1,6 +1,7 @@
 import type {
   AuthErrorBody,
   AuthUserResponse,
+  BrowsingEventListResponse,
   FocusSession,
   FocusSessionListResponse,
   FocusSessionResponse,
@@ -10,7 +11,7 @@ import type {
   PublicUser,
 } from "@surfguard/shared";
 
-const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
+const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${apiUrl}${path}`, {
@@ -113,6 +114,10 @@ export function stopSession(id: string): Promise<FocusSessionResponse> {
   return request<FocusSessionResponse>(`/api/sessions/${id}/stop`, {
     method: "POST",
   });
+}
+
+export function fetchEvents(): Promise<BrowsingEventListResponse> {
+  return request<BrowsingEventListResponse>("/api/events");
 }
 
 export type { FocusSession, Goal, PublicUser };

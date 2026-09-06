@@ -6,3 +6,4 @@ PORT=4001
 DATABASE_URL=postgresql://surfguard:surfguard@localhost:5432/surfguard?schema=public
 WEB_ORIGIN=http://localhost:5173
 VITE_API_URL=http://localhost:4001
+EVENTS_RATE_LIMIT=60

@@ -12,6 +12,11 @@ export type AuthUserResponse = {
   user: PublicUser;
 };
 
+export type AuthLoginResponse = {
+  user: PublicUser;
+  token: string;
+};
+
 export type AuthErrorBody = {
   error: string;
   code: string;
@@ -88,4 +93,22 @@ export type BrowserActivityEvent = {
   title: string | null;
   timestamp: string;
   tabId: number;
+};
+
+export type StoredBrowsingEvent = {
+  id: string;
+  url: string;
+  domain: string;
+  title: string | null;
+  tabId: number | null;
+  occurredAt: string;
+  focusSessionId: string | null;
+};
+
+export type BrowsingEventResponse = {
+  event: StoredBrowsingEvent;
+};
+
+export type BrowsingEventListResponse = {
+  events: StoredBrowsingEvent[];
 };

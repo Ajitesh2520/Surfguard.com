@@ -40,3 +40,25 @@ li {
 li span {
   color: #555;
 }
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.5rem 0;
+  font-size: 0.85rem;
+}
+
+input {
+  font: inherit;
+  padding: 0.35rem 0.45rem;
+}
+
+button {
+  font: inherit;
+  margin: 0.35rem 0 0.75rem;
+}
+
+.error {
+  color: #9b1c1c;
+}
