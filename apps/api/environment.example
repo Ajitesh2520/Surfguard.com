@@ -1,2 +1,7 @@
 PORT=4001
 DATABASE_URL=postgresql://surfguard:surfguard@localhost:5432/surfguard?schema=public
+WEB_ORIGIN=http://localhost:5173
+AUTH_COOKIE_NAME=surfguard_session
+COOKIE_SECURE=false
+SESSION_TTL_MS=604800000
+BCRYPT_COST=12

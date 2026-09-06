@@ -1,11 +1,18 @@
-export function App() {
-  const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { HomePage } from "./pages/HomePage";
+import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
+import { AppShell } from "./shell/AppShell";
 
+export function App() {
   return (
-    <main>
-      <h1>SurfGuard</h1>
-      <p>Dashboard foundation. Product features are not implemented yet.</p>
-      <p>API base URL: {apiUrl}</p>
-    </main>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route element={<AppShell />}>
+        <Route path="/" element={<HomePage />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }

@@ -1,13 +1,17 @@
+import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 async function seed() {
+  const passwordHash = await bcrypt.hash("dev-password-change-me", 10);
+
   const user = await prisma.user.upsert({
     where: { email: "dev@surfguard.local" },
-    update: {},
+    update: { passwordHash },
     create: {
       email: "dev@surfguard.local",
+      passwordHash,
       preference: {
         create: {
           defaultStrictness: "BALANCED",

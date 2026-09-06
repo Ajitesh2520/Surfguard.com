@@ -5,7 +5,7 @@
     "moduleResolution": "Node16",
     "outDir": "dist",
     "rootDir": "src",
-    "types": ["node"]
+    "types": ["node", "express", "cookie-parser"]
   },
   "include": ["src"]
 }

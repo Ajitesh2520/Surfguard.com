@@ -51,18 +51,33 @@ enum InterventionKind {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String?  @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   preference     UserPreference?
+  authSessions   AuthSession[]
   goals          Goal[]
   focusSessions  FocusSession[]
   browsingEvents BrowsingEvent[]
   interventions  Intervention[]
 
   @@map("users")
+}
+
+model AuthSession {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("auth_sessions")
 }
 
 model UserPreference {
