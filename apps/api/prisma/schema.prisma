@@ -100,6 +100,8 @@ model Goal {
   description String?
   category    GoalCategory
   isActive    Boolean      @default(true)
+  topics      String[]     @default([])
+  keywords    String[]     @default([])
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 

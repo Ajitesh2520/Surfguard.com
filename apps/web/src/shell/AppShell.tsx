@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Navigate, Outlet, useNavigate } from "react-router-dom";
+import { Link, Navigate, Outlet, useNavigate } from "react-router-dom";
 import { fetchMe, logout } from "../lib/api";
 
 export function AppShell() {
@@ -31,6 +31,10 @@ export function AppShell() {
     <div className="shell">
       <header className="shell-header">
         <strong>SurfGuard</strong>
+        <nav className="shell-nav">
+          <Link to="/">Home</Link>
+          <Link to="/goals">Goals</Link>
+        </nav>
         <span>{me.data.user.email}</span>
         <button type="button" onClick={() => void onLogout()}>
           Log out

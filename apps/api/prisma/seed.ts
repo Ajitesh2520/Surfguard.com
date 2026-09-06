@@ -30,6 +30,8 @@ async function seed() {
       title: "Prepare for interviews",
       description: "Seed goal for local development",
       category: "INTERVIEW_PREP",
+      topics: ["algorithms", "system design"],
+      keywords: ["leetcode", "interview"],
     },
   });
 

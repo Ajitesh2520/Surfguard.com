@@ -1,16 +1,11 @@
-import type { RequestHandler, Router } from "express";
+import type { Router } from "express";
 import { Router as createRouter } from "express";
+import { asyncHandler } from "../../async-handler";
 import { clearSessionCookie, setSessionCookie } from "./auth.cookies";
 import { AuthError } from "./auth.errors";
 import { requireAuth } from "./auth.middleware";
 import type { AuthService } from "./auth.service";
 import { validateCredentials } from "./auth.validation";
-
-function asyncHandler(handler: RequestHandler): RequestHandler {
-  return (req, res, next) => {
-    Promise.resolve(handler(req, res, next)).catch(next);
-  };
-}
 
 export function createAuthRouter(authService: AuthService): Router {
   const router = createRouter();

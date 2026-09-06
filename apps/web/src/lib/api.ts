@@ -1,4 +1,4 @@
-import type { AuthErrorBody, AuthUserResponse, PublicUser } from "@surfguard/shared";
+import type { AuthErrorBody, AuthUserResponse, Goal, GoalListResponse, GoalResponse, PublicUser } from "@surfguard/shared";
 
 const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
 
@@ -54,4 +54,30 @@ export function logout(): Promise<void> {
   return request<void>("/api/auth/logout", { method: "POST" });
 }
 
-export type { PublicUser };
+export function fetchGoals(): Promise<GoalListResponse> {
+  return request<GoalListResponse>("/api/goals");
+}
+
+export function fetchGoal(id: string): Promise<GoalResponse> {
+  return request<GoalResponse>(`/api/goals/${id}`);
+}
+
+export function createGoal(body: unknown): Promise<GoalResponse> {
+  return request<GoalResponse>("/api/goals", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function updateGoal(id: string, body: unknown): Promise<GoalResponse> {
+  return request<GoalResponse>(`/api/goals/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+}
+
+export function deleteGoal(id: string): Promise<void> {
+  return request<void>(`/api/goals/${id}`, { method: "DELETE" });
+}
+
+export type { Goal, PublicUser };

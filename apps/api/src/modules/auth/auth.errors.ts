@@ -1,12 +1,9 @@
-export class AuthError extends Error {
-  readonly status: number;
-  readonly code: string;
+import { HttpError } from "../../http-error";
 
+export class AuthError extends HttpError {
   constructor(status: number, code: string, message: string) {
-    super(message);
+    super(status, code, message);
     this.name = "AuthError";
-    this.status = status;
-    this.code = code;
   }
 
   static validation(message = "Invalid request"): AuthError {

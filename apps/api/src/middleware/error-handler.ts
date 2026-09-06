@@ -1,5 +1,5 @@
+import { isHttpError } from "../http-error";
 import type { NextFunction, Request, Response } from "express";
-import { isAuthError } from "../modules/auth/auth.errors";
 
 export function errorHandler(
   error: unknown,
@@ -12,7 +12,7 @@ export function errorHandler(
     return;
   }
 
-  if (isAuthError(error)) {
+  if (isHttpError(error)) {
     res.status(error.status).json({ error: error.message, code: error.code });
     return;
   }

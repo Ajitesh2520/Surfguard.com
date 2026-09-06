@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "goals" ADD COLUMN "topics" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[];
+ALTER TABLE "goals" ADD COLUMN "keywords" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[];

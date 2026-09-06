@@ -70,3 +70,55 @@ button:disabled {
 .shell-header span {
   margin-left: auto;
 }
+
+.shell-nav {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.goal-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+}
+
+.goal-list li {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #ddd;
+}
+
+textarea,
+select {
+  padding: 0.5rem 0.6rem;
+  font: inherit;
+}
+
+label.checkbox {
+  flex-direction: row;
+  align-items: center;
+}
+
+.goal-details {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: 0.5rem 1rem;
+}
+
+.goal-details dt {
+  font-weight: 600;
+}
+
+.danger {
+  color: #9b1c1c;
+}
