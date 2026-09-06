@@ -34,6 +34,7 @@ export function AppShell() {
         <nav className="shell-nav">
           <Link to="/">Home</Link>
           <Link to="/goals">Goals</Link>
+          <Link to="/sessions">Sessions</Link>
         </nav>
         <span>{me.data.user.email}</span>
         <button type="button" onClick={() => void onLogout()}>

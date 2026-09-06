@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, SessionStatus, SessionStrictness } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -42,10 +42,12 @@ async function seed() {
       id: "seed-session-1",
       userId: user.id,
       goalId: goal.id,
-      strictness: "BALANCED",
-      status: "ENDED",
-      startedAt: new Date("2026-01-01T10:00:00.000Z"),
-      endedAt: new Date("2026-01-01T11:00:00.000Z"),
+      strictness: SessionStrictness.BALANCED,
+      status: SessionStatus.COMPLETED,
+      startTime: new Date("2026-01-01T10:00:00.000Z"),
+      endTime: new Date("2026-01-01T11:00:00.000Z"),
+      durationMs: 60 * 60 * 1000,
+      plannedDurationMinutes: 60,
     },
   });
 

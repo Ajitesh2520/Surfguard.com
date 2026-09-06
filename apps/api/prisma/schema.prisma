@@ -27,8 +27,8 @@ enum SessionStrictness {
 
 enum SessionStatus {
   ACTIVE
-  PAUSED
-  ENDED
+  COMPLETED
+  CANCELLED
 }
 
 enum Decision {
@@ -113,24 +113,26 @@ model Goal {
 }
 
 model FocusSession {
-  id         String            @id @default(cuid())
-  userId     String
-  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  goalId     String
-  goal       Goal              @relation(fields: [goalId], references: [id], onDelete: Restrict)
-  strictness SessionStrictness @default(BALANCED)
-  status     SessionStatus     @default(ACTIVE)
-  startedAt  DateTime          @default(now())
-  endedAt    DateTime?
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
+  id                     String            @id @default(cuid())
+  userId                 String
+  user                   User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goalId                 String
+  goal                   Goal              @relation(fields: [goalId], references: [id], onDelete: Restrict)
+  strictness             SessionStrictness @default(BALANCED)
+  status                 SessionStatus     @default(ACTIVE)
+  startTime              DateTime          @default(now())
+  endTime                DateTime?
+  durationMs             Int?
+  plannedDurationMinutes Int
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
 
   browsingEvents BrowsingEvent[]
   interventions  Intervention[]
 
   @@index([userId, status])
   @@index([goalId])
-  @@index([startedAt])
+  @@index([startTime])
   @@map("focus_sessions")
 }
 

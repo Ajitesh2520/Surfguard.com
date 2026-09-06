@@ -4,11 +4,11 @@ export function HomePage() {
   return (
     <main>
       <h1>SurfGuard</h1>
+      <p>Create a goal, then start a focus session with a timer.</p>
       <p>
-        Manage your focus goals. Focus sessions are not implemented yet.
-      </p>
-      <p>
-        <Link to="/goals">View goals</Link>
+        <Link to="/goals">Goals</Link>
+        {" · "}
+        <Link to="/sessions">Sessions</Link>
       </p>
     </main>
   );

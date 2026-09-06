@@ -1,4 +1,14 @@
-import type { AuthErrorBody, AuthUserResponse, Goal, GoalListResponse, GoalResponse, PublicUser } from "@surfguard/shared";
+import type {
+  AuthErrorBody,
+  AuthUserResponse,
+  FocusSession,
+  FocusSessionListResponse,
+  FocusSessionResponse,
+  Goal,
+  GoalListResponse,
+  GoalResponse,
+  PublicUser,
+} from "@surfguard/shared";
 
 const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
 
@@ -80,4 +90,29 @@ export function deleteGoal(id: string): Promise<void> {
   return request<void>(`/api/goals/${id}`, { method: "DELETE" });
 }
 
-export type { Goal, PublicUser };
+export function fetchSessions(): Promise<FocusSessionListResponse> {
+  return request<FocusSessionListResponse>("/api/sessions");
+}
+
+export function fetchSession(id: string): Promise<FocusSessionResponse> {
+  return request<FocusSessionResponse>(`/api/sessions/${id}`);
+}
+
+export function startSession(body: {
+  goalId: string;
+  durationMinutes: number;
+  strictness: string;
+}): Promise<FocusSessionResponse> {
+  return request<FocusSessionResponse>("/api/sessions", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function stopSession(id: string): Promise<FocusSessionResponse> {
+  return request<FocusSessionResponse>(`/api/sessions/${id}/stop`, {
+    method: "POST",
+  });
+}
+
+export type { FocusSession, Goal, PublicUser };

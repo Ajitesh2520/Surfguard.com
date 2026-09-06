@@ -122,3 +122,26 @@ label.checkbox {
 .danger {
   color: #9b1c1c;
 }
+
+.timer-clock {
+  font-size: 3rem;
+  font-variant-numeric: tabular-nums;
+  margin: 0.5rem 0;
+}
+
+.session-list {
+  list-style: none;
+  padding: 0;
+}
+
+.session-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #ddd;
+}
+
+h2 {
+  margin-top: 2.5rem;
+}

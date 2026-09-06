@@ -50,3 +50,34 @@ export type GoalResponse = {
 export type GoalListResponse = {
   goals: Goal[];
 };
+
+export const SESSION_STRICTNESS = ["RELAXED", "BALANCED", "STRICT"] as const;
+export type SessionStrictness = (typeof SESSION_STRICTNESS)[number];
+
+export const SESSION_STATUSES = [
+  "ACTIVE",
+  "COMPLETED",
+  "CANCELLED",
+] as const;
+export type SessionStatus = (typeof SESSION_STATUSES)[number];
+
+export type FocusSession = {
+  id: string;
+  goalId: string;
+  strictness: SessionStrictness;
+  status: SessionStatus;
+  startTime: string;
+  endTime: string | null;
+  durationMs: number | null;
+  plannedDurationMinutes: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type FocusSessionResponse = {
+  session: FocusSession;
+};
+
+export type FocusSessionListResponse = {
+  sessions: FocusSession[];
+};
