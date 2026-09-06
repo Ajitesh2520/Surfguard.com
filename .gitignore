@@ -1,4 +1,4 @@
-# Node modules
+# Dependencies
 node_modules/
 **/node_modules/
 
@@ -7,11 +7,14 @@ dist/
 build/
 *.log
 
-# Environment variables
+# Environment
 .env
+.env.local
 
-# OS files
+# OS / editor
 .DS_Store
-
-# VSCode settings
 .vscode/
+.idea/
+
+# Tooling
+.eslintcache

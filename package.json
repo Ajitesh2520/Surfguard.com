@@ -1,14 +1,29 @@
 {
-  "devDependencies": {
-    "@types/chrome": "^0.1.36",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6"
+  "name": "surfguard",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npm run dev -w @surfguard/api",
+    "dev:web": "npm run dev -w @surfguard/web",
+    "build": "npm run build -w @surfguard/shared && npm run build -w @surfguard/api && npm run build -w @surfguard/web && npm run build -w @surfguard/extension",
+    "typecheck": "npm run build -w @surfguard/shared && npm run typecheck -w @surfguard/api && npm run typecheck -w @surfguard/web && npm run typecheck -w @surfguard/extension",
+    "lint": "eslint .",
+    "format": "prettier --write ."
   },
-  "dependencies": {
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "openai": "^6.21.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^15.12.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.16.0"
   }
 }

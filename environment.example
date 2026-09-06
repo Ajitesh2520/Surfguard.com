@@ -1,0 +1,6 @@
+# Copy values into the app-specific environment files as needed.
+# API: apps/api/.env
+# Web: apps/web/.env
+
+PORT=4000
+VITE_API_URL=http://localhost:4000
