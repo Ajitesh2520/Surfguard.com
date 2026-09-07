@@ -15,6 +15,7 @@ import type {
   DecisionResult,
   DecisionSource,
 } from "./types";
+import { analyzeDecisionContext } from "./types";
 
 function result(
   decision: InterventionDecision,
@@ -78,6 +79,37 @@ function deterministicRules(input: DecisionEngineInput): DecisionResult | null {
 }
 
 function contextSignals(input: DecisionEngineInput): DecisionResult | null {
+  const analysis =
+    input.context ??
+    (input.activity ? analyzeDecisionContext(input) : null);
+
+  if (analysis) {
+    if (analysis.pattern === "focused" && analysis.driftScore < 0.3) {
+      return result("ALLOW", "context", analysis.reason);
+    }
+    if (analysis.pattern === "recovering" && analysis.driftScore < 0.35) {
+      return result("ALLOW", "context", analysis.reason);
+    }
+    if (analysis.pattern === "spiraling") {
+      return result(
+        capForStrictness("BLOCK", input.strictness),
+        "context",
+        analysis.reason,
+      );
+    }
+    if (analysis.pattern === "drifting") {
+      const decision =
+        analysis.driftScore >= 0.5
+          ? capForStrictness("WARN", input.strictness)
+          : "NUDGE";
+      return result(decision, "context", analysis.reason);
+    }
+    if (analysis.pattern === "switching") {
+      const decision = input.strictness === "STRICT" ? "WARN" : "NUDGE";
+      return result(decision, "context", analysis.reason);
+    }
+  }
+
   const drifted =
     input.drift.offGoalStreak >= DRIFT_STREAK ||
     input.drift.offGoalRatio >= DRIFT_RATIO ||
@@ -171,6 +203,30 @@ export function decide(input: DecisionEngineInput): DecisionResult {
   );
 }
 
+export function decideWithContext(input: DecisionEngineInput): DecisionResult & {
+  context: ReturnType<typeof analyzeDecisionContext>;
+} {
+  const analysis = analyzeDecisionContext(input);
+  const decision = decide({
+    ...input,
+    context: analysis,
+    drift: {
+      offGoalStreak: analysis.signals.offGoalStreak,
+      offGoalRatio: analysis.signals.offGoalRatio,
+      repeatedOffGoalDomain: analysis.signals.repeatedOffGoalDomain,
+      rapidSwitching: analysis.signals.rapidSwitching,
+      increasingDistractionTime: analysis.signals.increasingDistractionTime,
+      returnedToProductive: analysis.signals.returnedToProductive,
+      sustainedProductive: analysis.signals.sustainedProductive,
+    },
+    recentContext:
+      input.recentContext.length > 0
+        ? input.recentContext
+        : (input.activity ?? []).map((event) => event.domain),
+  });
+  return { ...decision, context: analysis };
+}
+
 export function createDecisionEngine() {
-  return { decide };
+  return { decide, decideWithContext };
 }

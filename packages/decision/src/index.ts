@@ -1,4 +1,4 @@
-export { createDecisionEngine, decide } from "./engine";
+export { createDecisionEngine, decide, decideWithContext } from "./engine";
 export {
   DRIFT_RATIO,
   DRIFT_STREAK,
@@ -15,3 +15,4 @@ export type {
   DecisionSource,
   DriftSignals,
 } from "./types";
+export { analyzeDecisionContext, driftFromContext } from "./types";

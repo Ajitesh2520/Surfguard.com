@@ -81,6 +81,21 @@ export type AiClassification = {
   confidence: number;
 };
 
+export const DRIFT_PATTERNS = [
+  "focused",
+  "recovering",
+  "switching",
+  "drifting",
+  "spiraling",
+] as const;
+export type DriftPattern = (typeof DRIFT_PATTERNS)[number];
+
+export type ContextAnalysis = {
+  driftScore: number;
+  pattern: DriftPattern;
+  reason: string;
+};
+
 export const SESSION_STATUSES = [
   "ACTIVE",
   "COMPLETED",

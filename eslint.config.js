@@ -17,6 +17,7 @@ export default tseslint.config(
       "apps/api/**/*.ts",
       "packages/shared/**/*.ts",
       "packages/rules/**/*.ts",
+      "packages/context/**/*.ts",
       "packages/decision/**/*.ts",
     ],
     languageOptions: {

@@ -1,6 +1,9 @@
+import type { ContextActivity } from "@surfguard/context";
+import { analyzeContext } from "@surfguard/context";
 import type { RuleResult } from "@surfguard/rules";
 import type {
   AiClassification,
+  ContextAnalysis,
   InterventionDecision,
   SessionStrictness,
 } from "@surfguard/shared";
@@ -21,6 +24,10 @@ export type DriftSignals = {
   offGoalStreak: number;
   offGoalRatio: number;
   repeatedOffGoalDomain: boolean;
+  rapidSwitching?: boolean;
+  increasingDistractionTime?: boolean;
+  returnedToProductive?: boolean;
+  sustainedProductive?: boolean;
 };
 
 export type DecisionEngineInput = {
@@ -33,6 +40,8 @@ export type DecisionEngineInput = {
   recentContext: readonly string[];
   timeSpentMs: number;
   drift: DriftSignals;
+  context?: ContextAnalysis;
+  activity?: readonly ContextActivity[];
 };
 
 export type DecisionSource =
@@ -48,3 +57,19 @@ export type DecisionResult = {
   reason: string;
   source: DecisionSource;
 };
+
+export function driftFromContext(analysis: {
+  signals: DriftSignals;
+}): DriftSignals {
+  return { ...analysis.signals };
+}
+
+export function analyzeDecisionContext(
+  input: Pick<DecisionEngineInput, "activity" | "goal" | "preferences">,
+) {
+  return analyzeContext({
+    activity: input.activity ?? [],
+    goal: input.goal,
+    preferences: input.preferences,
+  });
+}
