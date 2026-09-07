@@ -15,6 +15,8 @@ export function createMemoryEventStore(): EventStore {
         domain: input.domain,
         title: input.title,
         tabId: input.tabId,
+        durationMs: null,
+        driftScore: null,
         occurredAt: input.occurredAt,
         createdAt: now,
       };
@@ -27,6 +29,22 @@ export function createMemoryEventStore(): EventStore {
         .filter((event) => event.userId === userId)
         .sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime())
         .slice(0, limit);
+    },
+
+    async listByUserSince(userId, since, limit) {
+      return events
+        .filter(
+          (event) => event.userId === userId && event.occurredAt >= since,
+        )
+        .sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime())
+        .slice(0, limit);
+    },
+
+    async updateMetrics(id, input) {
+      const event = events.find((item) => item.id === id);
+      if (!event) return;
+      if (input.durationMs !== undefined) event.durationMs = input.durationMs;
+      if (input.driftScore !== undefined) event.driftScore = input.driftScore;
     },
   };
 }

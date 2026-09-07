@@ -13,6 +13,8 @@ export type StoredClassification = {
 
 export type ClassificationStore = {
   create(record: StoredClassification): Promise<void>;
+  findByEventId(eventId: string): Promise<StoredClassification | null>;
+  findByEventIds(eventIds: string[]): Promise<StoredClassification[]>;
 };
 
 export type ClassificationCacheRecord = Omit<

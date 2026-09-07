@@ -1,3 +1,4 @@
+import type { AnalyticsService } from "../analytics/analytics.service";
 import { GoalError } from "../goals/goal.errors";
 import type { GoalStore } from "../goals/goal.store";
 import { SessionError } from "./session.errors";
@@ -18,6 +19,7 @@ export function createSessionService(
   store: SessionStore,
   goalStore: GoalStore,
   clock: () => Date = () => new Date(),
+  analytics?: AnalyticsService,
 ) {
   return {
     async start(userId: string, input: StartSessionInput) {
@@ -70,6 +72,13 @@ export function createSessionService(
       });
       if (!stopped || stopped.status !== "COMPLETED") {
         throw SessionError.invalidTransition();
+      }
+      if (analytics && stopped.durationMs !== null && stopped.endTime) {
+        await analytics.recordCompletedSession(
+          userId,
+          stopped.durationMs,
+          stopped.endTime,
+        );
       }
       return toPublicSession(stopped);
     },

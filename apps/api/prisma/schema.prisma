@@ -64,6 +64,7 @@ model User {
   browsingEvents BrowsingEvent[]
   interventions  Intervention[]
   classificationCache ClassificationCache[]
+  analyticsDaily AnalyticsDaily[]
 
   @@map("users")
 }
@@ -135,6 +136,7 @@ model FocusSession {
   @@index([userId, status])
   @@index([goalId])
   @@index([startTime])
+  @@index([userId, startTime])
   @@map("focus_sessions")
 }
 
@@ -148,6 +150,8 @@ model BrowsingEvent {
   domain         String
   title          String?
   tabId          Int?
+  durationMs     Int?
+  driftScore     Float?
   occurredAt     DateTime      @default(now())
   createdAt      DateTime      @default(now())
 
@@ -157,6 +161,7 @@ model BrowsingEvent {
   @@index([userId, occurredAt])
   @@index([focusSessionId, occurredAt])
   @@index([domain])
+  @@index([userId, domain, occurredAt])
   @@map("browsing_events")
 }
 
@@ -175,6 +180,7 @@ model Classification {
   updatedAt       DateTime             @updatedAt
 
   @@index([decision, source])
+  @@index([relevant])
   @@map("classifications")
 }
 
@@ -216,5 +222,30 @@ model Intervention {
   @@index([userId, createdAt])
   @@index([focusSessionId])
   @@index([kind])
+  @@index([userId, kind, createdAt])
   @@map("interventions")
+}
+
+model AnalyticsDaily {
+  id                 String   @id @default(cuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  day                DateTime @db.Date
+  focusTimeMs        Int      @default(0)
+  productiveTimeMs   Int      @default(0)
+  distractedTimeMs   Int      @default(0)
+  interventions      Int      @default(0)
+  blockedAttempts    Int      @default(0)
+  nudges             Int      @default(0)
+  warns              Int      @default(0)
+  contextSwitches    Int      @default(0)
+  driftScoreSum      Float    @default(0)
+  driftScoreCount    Int      @default(0)
+  completedSessions  Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([userId, day])
+  @@index([userId, day])
+  @@map("analytics_daily")
 }

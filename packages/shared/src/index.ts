@@ -138,6 +138,8 @@ export type StoredBrowsingEvent = {
   domain: string;
   title: string | null;
   tabId: number | null;
+  durationMs: number | null;
+  driftScore: number | null;
   occurredAt: string;
   focusSessionId: string | null;
 };
@@ -169,3 +171,73 @@ export function blockAllowsContinue(
   if (source === "user") return false;
   return strictness !== "STRICT";
 }
+
+export type AnalyticsOverview = {
+  focusTimeMs: number;
+  productiveTimeMs: number;
+  distractedTimeMs: number;
+  interventions: number;
+  blockedAttempts: number;
+  nudges: number;
+  contextSwitches: number;
+  averageDriftScore: number;
+  completedSessions: number;
+};
+
+export type AnalyticsSessionRow = {
+  id: string;
+  goalId: string;
+  goalTitle: string;
+  status: SessionStatus;
+  strictness: SessionStrictness;
+  startTime: string;
+  endTime: string | null;
+  durationMs: number | null;
+};
+
+export type AnalyticsTimelineItem = {
+  id: string;
+  occurredAt: string;
+  domain: string;
+  title: string | null;
+  decision: InterventionDecision | null;
+  durationMs: number | null;
+  driftScore: number | null;
+};
+
+export type AnalyticsGoalPerformance = {
+  goalId: string;
+  title: string;
+  sessions: number;
+  completedSessions: number;
+  focusTimeMs: number;
+  productiveTimeMs: number;
+  distractedTimeMs: number;
+};
+
+export type AnalyticsDistractionRow = {
+  domain: string;
+  visits: number;
+  distractedTimeMs: number;
+  blocks: number;
+  nudges: number;
+};
+
+export type AnalyticsInterventionRow = {
+  id: string;
+  kind: "NUDGE" | "WARN" | "BLOCK";
+  message: string | null;
+  createdAt: string;
+  domain: string | null;
+  goalTitle: string | null;
+};
+
+export type AnalyticsResponse = {
+  rangeDays: number;
+  overview: AnalyticsOverview;
+  sessions: AnalyticsSessionRow[];
+  timeline: AnalyticsTimelineItem[];
+  goals: AnalyticsGoalPerformance[];
+  distractions: AnalyticsDistractionRow[];
+  interventions: AnalyticsInterventionRow[];
+};

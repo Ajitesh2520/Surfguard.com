@@ -12,5 +12,14 @@ export function createMemoryClassificationStore(): ClassificationStore & {
     async create(record) {
       records.push(record);
     },
+    async findByEventId(eventId) {
+      return (
+        records.find((record) => record.browsingEventId === eventId) ?? null
+      );
+    },
+    async findByEventIds(eventIds) {
+      const ids = new Set(eventIds);
+      return records.filter((record) => ids.has(record.browsingEventId));
+    },
   };
 }

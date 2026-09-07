@@ -5,6 +5,7 @@ import {
   type StoredBrowsingEvent,
 } from "@surfguard/shared";
 import { log } from "../../log";
+import type { AnalyticsService } from "../analytics/analytics.service";
 import type { ClassificationPipeline } from "../classification/pipeline";
 import type { GoalStore } from "../goals/goal.store";
 import type { SessionStore } from "../sessions/session.store";
@@ -29,6 +30,7 @@ export function createEventService(
   sessionStore: SessionStore,
   goalStore?: GoalStore,
   pipeline?: ClassificationPipeline,
+  analytics?: AnalyticsService,
 ) {
   return {
     async ingest(
@@ -54,6 +56,9 @@ export function createEventService(
         log("info", "event_without_active_session", { userId });
       }
 
+      const previousList = await store.listByUser(userId, 1);
+      const previous = previousList[0] ?? null;
+
       const event = await store.create(userId, {
         focusSessionId,
         url: normalized.url,
@@ -71,9 +76,12 @@ export function createEventService(
       });
 
       let intervention: InterventionPayload | null = null;
+      let driftScore: number | null = null;
+      let goalTitle: string | null = null;
+
       if (active && goalStore && pipeline) {
         try {
-          intervention = await decideForEvent(
+          const decided = await decideForEvent(
             store,
             pipeline,
             goalStore,
@@ -82,6 +90,11 @@ export function createEventService(
             active.strictness,
             active.goalId,
           );
+          if (decided) {
+            intervention = decided.intervention;
+            driftScore = decided.driftScore;
+            goalTitle = decided.goalTitle;
+          }
         } catch (error) {
           log("error", "classification_failed", {
             userId,
@@ -89,6 +102,18 @@ export function createEventService(
             message: error instanceof Error ? error.message : "unknown",
           });
         }
+      }
+
+      if (analytics) {
+        await analytics.recordIngest({
+          userId,
+          previous,
+          current: event,
+          goalTitle,
+          decision: intervention?.decision ?? null,
+          reason: intervention?.reason ?? null,
+          driftScore,
+        });
       }
 
       return { event: toPublicEvent(event), intervention };
@@ -111,7 +136,11 @@ async function decideForEvent(
   event: EventRecord,
   strictness: InterventionPayload["strictness"],
   goalId: string,
-): Promise<InterventionPayload | null> {
+): Promise<{
+  intervention: InterventionPayload;
+  driftScore: number;
+  goalTitle: string;
+} | null> {
   const goal = await goalStore.findByUserAndId(userId, goalId);
   if (!goal) return null;
 
@@ -174,13 +203,17 @@ async function decideForEvent(
   });
 
   return {
-    decision: decided.decision,
-    reason: decided.reason,
+    driftScore: decided.context.driftScore,
     goalTitle: goal.title,
-    pageTitle: event.title,
-    url: event.url,
-    domain: event.domain,
-    canContinue,
-    strictness,
+    intervention: {
+      decision: decided.decision,
+      reason: decided.reason,
+      goalTitle: goal.title,
+      pageTitle: event.title,
+      url: event.url,
+      domain: event.domain,
+      canContinue,
+      strictness,
+    },
   };
 }

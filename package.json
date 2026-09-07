@@ -12,7 +12,7 @@
     "dev:web": "npm run dev -w @surfguard/web",
     "build": "npm run build -w @surfguard/shared && npm run build -w @surfguard/rules && npm run build -w @surfguard/context && npm run build -w @surfguard/decision && npm run build -w @surfguard/api && npm run build -w @surfguard/web && npm run build -w @surfguard/extension",
     "typecheck": "npm run build -w @surfguard/shared && npm run build -w @surfguard/rules && npm run build -w @surfguard/context && npm run build -w @surfguard/decision && npm run typecheck -w @surfguard/api && npm run typecheck -w @surfguard/web && npm run typecheck -w @surfguard/extension",
-    "test": "npm run build -w @surfguard/shared && npm run build -w @surfguard/rules && npm run build -w @surfguard/context && npm run build -w @surfguard/decision && npm run test -w @surfguard/rules && npm run test -w @surfguard/context && npm run test -w @surfguard/decision && npm run test -w @surfguard/api",
+    "test": "npm run build -w @surfguard/shared && npm run build -w @surfguard/rules && npm run build -w @surfguard/context && npm run build -w @surfguard/decision && npm run test -w @surfguard/rules && npm run test -w @surfguard/context && npm run test -w @surfguard/decision && npm run test -w @surfguard/api && npm run test -w @surfguard/web",
     "lint": "eslint .",
     "format": "prettier --write ."
   },

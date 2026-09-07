@@ -36,6 +36,7 @@ export function AppShell() {
           <Link to="/goals">Goals</Link>
           <Link to="/sessions">Sessions</Link>
           <Link to="/activity">Activity</Link>
+          <Link to="/analytics">Analytics</Link>
         </nav>
         <span>{me.data.user.email}</span>
         <button type="button" onClick={() => void onLogout()}>

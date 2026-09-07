@@ -9,6 +9,7 @@ import type {
   GoalListResponse,
   GoalResponse,
   PublicUser,
+  AnalyticsResponse,
 } from "@surfguard/shared";
 
 const apiUrl = import.meta.env.VITE_API_URL ?? "http://localhost:4001";
@@ -120,4 +121,8 @@ export function fetchEvents(): Promise<BrowsingEventListResponse> {
   return request<BrowsingEventListResponse>("/api/events");
 }
 
-export type { FocusSession, Goal, PublicUser };
+export function fetchAnalytics(days = 7): Promise<AnalyticsResponse> {
+  return request<AnalyticsResponse>(`/api/analytics?days=${days}`);
+}
+
+export type { AnalyticsResponse, FocusSession, Goal, PublicUser };

@@ -7,6 +7,7 @@ import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ActivityPage } from "./pages/ActivityPage";
+import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { SessionsPage } from "./pages/SessionsPage";
 import { AppShell } from "./shell/AppShell";
 
@@ -23,6 +24,7 @@ export function App() {
         <Route path="/goals/:id/edit" element={<GoalEditPage />} />
         <Route path="/sessions" element={<SessionsPage />} />
         <Route path="/activity" element={<ActivityPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
