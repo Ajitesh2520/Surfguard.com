@@ -59,6 +59,9 @@ export type GoalListResponse = {
 export const SESSION_STRICTNESS = ["RELAXED", "BALANCED", "STRICT"] as const;
 export type SessionStrictness = (typeof SESSION_STRICTNESS)[number];
 
+export const RULE_DECISIONS = ["ALLOW", "BLOCK", "UNKNOWN"] as const;
+export type RuleDecision = (typeof RULE_DECISIONS)[number];
+
 export const SESSION_STATUSES = [
   "ACTIVE",
   "COMPLETED",
