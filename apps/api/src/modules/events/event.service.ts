@@ -1,4 +1,6 @@
 import { log } from "../../log";
+import type { ClassificationPipeline } from "../classification/pipeline";
+import type { GoalStore } from "../goals/goal.store";
 import type { SessionStore } from "../sessions/session.store";
 import { EventError } from "./event.errors";
 import { toPublicEvent, type EventStore } from "./event.store";
@@ -14,6 +16,8 @@ export type IngestEventInput = {
 export function createEventService(
   store: EventStore,
   sessionStore: SessionStore,
+  goalStore?: GoalStore,
+  pipeline?: ClassificationPipeline,
 ) {
   return {
     async ingest(userId: string, input: IngestEventInput) {
@@ -51,6 +55,35 @@ export function createEventService(
         focusSessionId: event.focusSessionId,
         tabId: event.tabId,
       });
+
+      if (active && goalStore && pipeline) {
+        try {
+          const goal = await goalStore.findByUserAndId(userId, active.goalId);
+          if (goal) {
+            const recent = (await store.listByUser(userId, 6))
+              .filter((item) => item.id !== event.id)
+              .map((item) =>
+                [item.domain, item.title].filter(Boolean).join(" "),
+              );
+            await pipeline.run({
+              userId,
+              eventId: event.id,
+              url: event.url,
+              domain: event.domain,
+              title: event.title,
+              goal,
+              strictness: active.strictness,
+              recentContext: recent,
+            });
+          }
+        } catch (error) {
+          log("error", "classification_failed", {
+            userId,
+            domain: event.domain,
+            message: error instanceof Error ? error.message : "unknown",
+          });
+        }
+      }
 
       return toPublicEvent(event);
     },

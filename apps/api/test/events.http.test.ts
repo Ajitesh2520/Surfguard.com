@@ -3,6 +3,9 @@ import { after, before, test } from "node:test";
 import request from "supertest";
 import { createApp } from "../src/app";
 import { createMemoryAuthStore } from "../src/modules/auth/auth.store.memory";
+import { createMemoryClassificationCache } from "../src/modules/classification/classification.cache.memory";
+import { createMemoryClassificationStore } from "../src/modules/classification/classification.store.memory";
+import { createMockClassifier } from "../src/modules/classification/classifier.mock";
 import { createMemoryEventStore } from "../src/modules/events/event.store.memory";
 import { createMemoryGoalStore } from "../src/modules/goals/goal.store.memory";
 import { createMemorySessionStore } from "../src/modules/sessions/session.store.memory";
@@ -34,6 +37,9 @@ function app() {
     goalStore: createMemoryGoalStore(),
     sessionStore: createMemorySessionStore(),
     eventStore: createMemoryEventStore(),
+    classifier: createMockClassifier(),
+    classificationCache: createMemoryClassificationCache(),
+    classificationStore: createMemoryClassificationStore(),
   });
 }
 

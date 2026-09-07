@@ -8,6 +8,13 @@ import { createAuthRouter } from "./modules/auth/auth.routes";
 import { createAuthService } from "./modules/auth/auth.service";
 import type { AuthStore } from "./modules/auth/auth.store";
 import { createPrismaAuthStore } from "./modules/auth/auth.store.prisma";
+import type { AiClassifier } from "./modules/classification/classifier";
+import { createPrismaClassificationCache } from "./modules/classification/classification.cache.prisma";
+import type { ClassificationCacheStore } from "./modules/classification/classification.store";
+import { createPrismaClassificationStore } from "./modules/classification/classification.store.prisma";
+import type { ClassificationStore } from "./modules/classification/classification.store";
+import { createOpenAiClassifier } from "./modules/classification/classifier.openai";
+import { createClassificationPipeline } from "./modules/classification/pipeline";
 import { createEventRouter } from "./modules/events/event.routes";
 import { createEventService } from "./modules/events/event.service";
 import type { EventStore } from "./modules/events/event.store";
@@ -45,16 +52,34 @@ export function createApp(options?: {
   goalStore?: GoalStore;
   sessionStore?: SessionStore;
   eventStore?: EventStore;
+  classifier?: AiClassifier;
+  classificationCache?: ClassificationCacheStore;
+  classificationStore?: ClassificationStore;
 }) {
   const app = express();
   const authStore = options?.authStore ?? createPrismaAuthStore();
   const goalStore = options?.goalStore ?? createPrismaGoalStore();
   const sessionStore = options?.sessionStore ?? createPrismaSessionStore();
   const eventStore = options?.eventStore ?? createPrismaEventStore();
+  const classifier = options?.classifier ?? createOpenAiClassifier();
+  const classificationCache =
+    options?.classificationCache ?? createPrismaClassificationCache();
+  const classificationStore =
+    options?.classificationStore ?? createPrismaClassificationStore();
+  const pipeline = createClassificationPipeline({
+    classifier,
+    cache: classificationCache,
+    classifications: classificationStore,
+  });
   const authService = createAuthService(authStore);
   const goalService = createGoalService(goalStore);
   const sessionService = createSessionService(sessionStore, goalStore);
-  const eventService = createEventService(eventStore, sessionStore);
+  const eventService = createEventService(
+    eventStore,
+    sessionStore,
+    goalStore,
+    pipeline,
+  );
 
   app.use(
     cors({

@@ -62,6 +62,17 @@ export type SessionStrictness = (typeof SESSION_STRICTNESS)[number];
 export const RULE_DECISIONS = ["ALLOW", "BLOCK", "UNKNOWN"] as const;
 export type RuleDecision = (typeof RULE_DECISIONS)[number];
 
+export const AI_DECISIONS = ["allow", "nudge", "warn", "block"] as const;
+export type AiDecision = (typeof AI_DECISIONS)[number];
+
+export type AiClassification = {
+  relevanceScore: number;
+  category: GoalCategory;
+  decision: AiDecision;
+  reason: string;
+  confidence: number;
+};
+
 export const SESSION_STATUSES = [
   "ACTIVE",
   "COMPLETED",

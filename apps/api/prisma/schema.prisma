@@ -63,6 +63,7 @@ model User {
   focusSessions  FocusSession[]
   browsingEvents BrowsingEvent[]
   interventions  Intervention[]
+  classificationCache ClassificationCache[]
 
   @@map("users")
 }
@@ -106,6 +107,7 @@ model Goal {
   updatedAt   DateTime     @updatedAt
 
   focusSessions FocusSession[]
+  classificationCache ClassificationCache[]
 
   @@index([userId, isActive])
   @@index([category])
@@ -164,6 +166,8 @@ model Classification {
   browsingEvent   BrowsingEvent        @relation(fields: [browsingEventId], references: [id], onDelete: Cascade)
   decision        Decision
   relevant        Boolean
+  relevanceScore  Float                @default(0)
+  category        String?
   confidence      Float?
   source          ClassificationSource
   reason          String?
@@ -172,6 +176,29 @@ model Classification {
 
   @@index([decision, source])
   @@map("classifications")
+}
+
+model ClassificationCache {
+  id             String               @id @default(cuid())
+  userId         String
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goalId         String
+  goal           Goal                 @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  url            String
+  domain         String
+  decision       Decision
+  category       String
+  relevanceScore Float
+  relevant       Boolean
+  confidence     Float
+  reason         String?
+  source         ClassificationSource
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@unique([userId, goalId, url])
+  @@index([userId, domain])
+  @@map("classification_cache")
 }
 
 model Intervention {
