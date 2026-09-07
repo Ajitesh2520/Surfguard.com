@@ -144,8 +144,28 @@ export type StoredBrowsingEvent = {
 
 export type BrowsingEventResponse = {
   event: StoredBrowsingEvent;
+  intervention?: InterventionPayload | null;
 };
 
 export type BrowsingEventListResponse = {
   events: StoredBrowsingEvent[];
 };
+
+export type InterventionPayload = {
+  decision: InterventionDecision;
+  reason: string;
+  goalTitle: string;
+  pageTitle: string | null;
+  url: string;
+  domain: string;
+  canContinue: boolean;
+  strictness: SessionStrictness;
+};
+
+export function blockAllowsContinue(
+  strictness: SessionStrictness,
+  source: string,
+): boolean {
+  if (source === "user") return false;
+  return strictness !== "STRICT";
+}

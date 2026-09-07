@@ -77,6 +77,7 @@ test("persists events without an active session", async () => {
   assert.equal(created.body.event.domain, "example.com");
   assert.equal(created.body.event.url, "https://example.com/path");
   assert.equal(created.body.event.focusSessionId, null);
+  assert.equal(created.body.intervention, null);
   assert.equal(created.body.event.tabId, 12);
   assert.equal(created.body.event.title, "Example");
 
@@ -109,6 +110,42 @@ test("attaches the active focus session and accepts bearer auth", async () => {
   assert.equal(created.status, 201);
   assert.equal(created.body.event.domain, "github.com");
   assert.equal(created.body.event.focusSessionId, started.body.session.id);
+  assert.equal(created.body.intervention.decision, "ALLOW");
+});
+
+test("returns nudge, warn, and block interventions from session policy", async () => {
+  async function ingestOn(strictness: "RELAXED" | "BALANCED" | "STRICT") {
+    const server = app();
+    const agent = request.agent(server);
+    await loginAgent(agent, `${strictness}-${Date.now()}@surfguard.test`);
+    const goal = await agent.post("/api/goals").send({
+      title: "Deep work",
+      category: "WORK",
+    });
+    await agent.post("/api/sessions").send({
+      goalId: goal.body.goal.id,
+      durationMinutes: 25,
+      strictness,
+    });
+    return agent.post("/api/events").send({
+      url: "https://instagram.com/",
+      title: "Instagram",
+    });
+  }
+
+  const relaxed = await ingestOn("RELAXED");
+  assert.equal(relaxed.status, 201);
+  assert.equal(relaxed.body.intervention.decision, "NUDGE");
+  assert.equal(relaxed.body.intervention.canContinue, true);
+  assert.equal(relaxed.body.intervention.goalTitle, "Deep work");
+
+  const balanced = await ingestOn("BALANCED");
+  assert.equal(balanced.body.intervention.decision, "WARN");
+  assert.equal(balanced.body.intervention.pageTitle, "Instagram");
+
+  const strict = await ingestOn("STRICT");
+  assert.equal(strict.body.intervention.decision, "BLOCK");
+  assert.equal(strict.body.intervention.canContinue, false);
 });
 
 test("rate limits event ingest", async () => {

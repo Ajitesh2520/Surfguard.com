@@ -1,9 +1,15 @@
+import { decideWithContext } from "@surfguard/decision";
+import {
+  blockAllowsContinue,
+  type InterventionPayload,
+  type StoredBrowsingEvent,
+} from "@surfguard/shared";
 import { log } from "../../log";
 import type { ClassificationPipeline } from "../classification/pipeline";
 import type { GoalStore } from "../goals/goal.store";
 import type { SessionStore } from "../sessions/session.store";
 import { EventError } from "./event.errors";
-import { toPublicEvent, type EventStore } from "./event.store";
+import { toPublicEvent, type EventRecord, type EventStore } from "./event.store";
 import { normalizeBrowsingUrl } from "./url";
 
 export type IngestEventInput = {
@@ -13,6 +19,11 @@ export type IngestEventInput = {
   tabId?: number;
 };
 
+export type IngestEventResult = {
+  event: StoredBrowsingEvent;
+  intervention: InterventionPayload | null;
+};
+
 export function createEventService(
   store: EventStore,
   sessionStore: SessionStore,
@@ -20,7 +31,10 @@ export function createEventService(
   pipeline?: ClassificationPipeline,
 ) {
   return {
-    async ingest(userId: string, input: IngestEventInput) {
+    async ingest(
+      userId: string,
+      input: IngestEventInput,
+    ): Promise<IngestEventResult> {
       const normalized = normalizeBrowsingUrl(input.url);
       if (!normalized) {
         throw EventError.validation("Valid http(s) URL required");
@@ -56,26 +70,18 @@ export function createEventService(
         tabId: event.tabId,
       });
 
+      let intervention: InterventionPayload | null = null;
       if (active && goalStore && pipeline) {
         try {
-          const goal = await goalStore.findByUserAndId(userId, active.goalId);
-          if (goal) {
-            const recent = (await store.listByUser(userId, 6))
-              .filter((item) => item.id !== event.id)
-              .map((item) =>
-                [item.domain, item.title].filter(Boolean).join(" "),
-              );
-            await pipeline.run({
-              userId,
-              eventId: event.id,
-              url: event.url,
-              domain: event.domain,
-              title: event.title,
-              goal,
-              strictness: active.strictness,
-              recentContext: recent,
-            });
-          }
+          intervention = await decideForEvent(
+            store,
+            pipeline,
+            goalStore,
+            userId,
+            event,
+            active.strictness,
+            active.goalId,
+          );
         } catch (error) {
           log("error", "classification_failed", {
             userId,
@@ -85,7 +91,7 @@ export function createEventService(
         }
       }
 
-      return toPublicEvent(event);
+      return { event: toPublicEvent(event), intervention };
     },
 
     async list(userId: string) {
@@ -96,3 +102,85 @@ export function createEventService(
 }
 
 export type EventService = ReturnType<typeof createEventService>;
+
+async function decideForEvent(
+  store: EventStore,
+  pipeline: ClassificationPipeline,
+  goalStore: GoalStore,
+  userId: string,
+  event: EventRecord,
+  strictness: InterventionPayload["strictness"],
+  goalId: string,
+): Promise<InterventionPayload | null> {
+  const goal = await goalStore.findByUserAndId(userId, goalId);
+  if (!goal) return null;
+
+  const recent = await store.listByUser(userId, 8);
+  const chronological = [...recent].reverse();
+  const recentContext = chronological
+    .filter((item) => item.id !== event.id)
+    .map((item) => [item.domain, item.title].filter(Boolean).join(" "));
+
+  const pipelineResult = await pipeline.run({
+    userId,
+    eventId: event.id,
+    url: event.url,
+    domain: event.domain,
+    title: event.title,
+    goal,
+    strictness,
+    recentContext,
+  });
+
+  const previous = chronological.filter((item) => item.id !== event.id).at(-1);
+  const timeSpentMs = previous
+    ? Math.max(0, event.occurredAt.getTime() - previous.occurredAt.getTime())
+    : 30_000;
+
+  const decided = decideWithContext({
+    domain: event.domain,
+    goal: {
+      title: goal.title,
+      category: goal.category,
+      topics: goal.topics,
+      keywords: goal.keywords,
+    },
+    strictness,
+    rule: pipelineResult.rule,
+    classification: pipelineResult.ai,
+    preferences: {},
+    recentContext,
+    timeSpentMs,
+    drift: {
+      offGoalStreak: 0,
+      offGoalRatio: 0,
+      repeatedOffGoalDomain: false,
+    },
+    activity: chronological.map((item) => ({
+      domain: item.domain,
+      title: item.title,
+      occurredAt: item.occurredAt,
+    })),
+  });
+
+  const canContinue =
+    decided.decision !== "BLOCK" ||
+    blockAllowsContinue(strictness, decided.source);
+
+  log("info", "intervention_decided", {
+    domain: event.domain,
+    decision: decided.decision,
+    source: decided.source,
+  });
+
+  return {
+    decision: decided.decision,
+    reason: decided.reason,
+    goalTitle: goal.title,
+    pageTitle: event.title,
+    url: event.url,
+    domain: event.domain,
+    canContinue,
+    strictness,
+  };
+}

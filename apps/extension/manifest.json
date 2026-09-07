@@ -6,7 +6,9 @@
   "permissions": ["tabs", "storage"],
   "host_permissions": [
     "http://localhost:4000/*",
-    "http://localhost:4001/*"
+    "http://localhost:4001/*",
+    "http://*/*",
+    "https://*/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -15,5 +17,12 @@
   "background": {
     "service_worker": "background.js",
     "type": "module"
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
 }

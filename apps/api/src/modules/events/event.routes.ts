@@ -36,11 +36,11 @@ export function createEventRouter(
     validateIngestEvent,
     asyncHandler(async (req, res) => {
       const principal = requirePrincipal(req);
-      const event = await eventService.ingest(
+      const result = await eventService.ingest(
         principal.userId,
         req.body as IngestEventInput,
       );
-      res.status(201).json({ event });
+      res.status(201).json(result);
     }),
   );
 

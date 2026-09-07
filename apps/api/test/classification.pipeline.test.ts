@@ -39,7 +39,7 @@ function setup() {
 
 test("rule engine ALLOW skips AI", async () => {
   const { classifier, classifications, pipeline } = setup();
-  const stored = await pipeline.run({
+  const { classification } = await pipeline.run({
     userId: "user-1",
     eventId: "evt-1",
     url: "https://github.com/explore",
@@ -49,15 +49,15 @@ test("rule engine ALLOW skips AI", async () => {
     strictness: "BALANCED",
     recentContext: [],
   });
-  assert.equal(stored.decision, "ALLOW");
-  assert.equal(stored.source, "RULE");
+  assert.equal(classification.decision, "ALLOW");
+  assert.equal(classification.source, "RULE");
   assert.equal(classifier.calls.length, 0);
   assert.equal(classifications.records.length, 1);
 });
 
 test("rule engine BLOCK skips AI", async () => {
   const { classifier, pipeline } = setup();
-  const stored = await pipeline.run({
+  const { classification } = await pipeline.run({
     userId: "user-1",
     eventId: "evt-2",
     url: "https://instagram.com/",
@@ -67,8 +67,8 @@ test("rule engine BLOCK skips AI", async () => {
     strictness: "STRICT",
     recentContext: [],
   });
-  assert.equal(stored.decision, "BLOCK");
-  assert.equal(stored.source, "RULE");
+  assert.equal(classification.decision, "BLOCK");
+  assert.equal(classification.source, "RULE");
   assert.equal(classifier.calls.length, 0);
 });
 
@@ -95,11 +95,11 @@ test("UNKNOWN domains call AI once and then use cache", async () => {
     recentContext: [],
   });
 
-  assert.equal(first.decision, "WARN");
-  assert.equal(first.source, "AI");
-  assert.equal(first.relevanceScore, 0.15);
-  assert.equal(second.source, "CACHE");
-  assert.equal(second.decision, "WARN");
+  assert.equal(first.classification.decision, "WARN");
+  assert.equal(first.classification.source, "AI");
+  assert.equal(first.classification.relevanceScore, 0.15);
+  assert.equal(second.classification.source, "CACHE");
+  assert.equal(second.classification.decision, "WARN");
   assert.equal(classifier.calls.length, 1);
   assert.equal(classifier.calls[0]?.recentContext[0], "github.com Explore");
   assert.equal(classifications.records.length, 2);

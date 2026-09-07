@@ -1,5 +1,5 @@
-import { evaluate as evaluateRules } from "@surfguard/rules";
-import type { GoalCategory, SessionStrictness } from "@surfguard/shared";
+import { evaluate as evaluateRules, type RuleResult } from "@surfguard/rules";
+import type { AiClassification, GoalCategory, SessionStrictness } from "@surfguard/shared";
 import { log } from "../../log";
 import type { GoalRecord } from "../goals/goal.store";
 import type { AiClassifier } from "./classifier";
@@ -21,6 +21,12 @@ export type ClassificationPipelineInput = {
   recentContext: readonly string[];
 };
 
+export type PipelineResult = {
+  classification: StoredClassification;
+  rule: RuleResult;
+  ai: AiClassification | null;
+};
+
 export function createClassificationPipeline(options: {
   classifier: AiClassifier;
   cache: ClassificationCacheStore;
@@ -30,31 +36,7 @@ export function createClassificationPipeline(options: {
   const evaluate = options.evaluate ?? evaluateRules;
 
   return {
-    async run(input: ClassificationPipelineInput): Promise<StoredClassification> {
-      const cached = await options.cache.get(
-        input.userId,
-        input.goal.id,
-        input.url,
-      );
-      if (cached) {
-        const stored = {
-          browsingEventId: input.eventId,
-          decision: cached.decision,
-          relevant: cached.relevant,
-          relevanceScore: cached.relevanceScore,
-          category: cached.category,
-          confidence: cached.confidence,
-          source: "CACHE" as const,
-          reason: cached.reason,
-        };
-        await options.classifications.create(stored);
-        log("info", "classification_cache_hit", {
-          domain: input.domain,
-          decision: stored.decision,
-        });
-        return stored;
-      }
-
+    async run(input: ClassificationPipelineInput): Promise<PipelineResult> {
       const rule = evaluate({
         url: input.url,
         domain: input.domain,
@@ -69,18 +51,47 @@ export function createClassificationPipeline(options: {
         strictness: input.strictness,
       });
 
-      let stored: StoredClassification;
+      const cached = await options.cache.get(
+        input.userId,
+        input.goal.id,
+        input.url,
+      );
+      if (cached) {
+        const classification: StoredClassification = {
+          browsingEventId: input.eventId,
+          decision: cached.decision,
+          relevant: cached.relevant,
+          relevanceScore: cached.relevanceScore,
+          category: cached.category,
+          confidence: cached.confidence,
+          source: "CACHE",
+          reason: cached.reason,
+        };
+        await options.classifications.create(classification);
+        log("info", "classification_cache_hit", {
+          domain: input.domain,
+          decision: classification.decision,
+        });
+        return {
+          classification,
+          rule,
+          ai: cached.source === "AI" ? toAiClassification(cached) : null,
+        };
+      }
+
+      let classification: StoredClassification;
+      let ai: AiClassification | null = null;
 
       if (rule.decision === "ALLOW" || rule.decision === "BLOCK") {
-        stored = fromRule(input, rule.decision, rule.reason);
+        classification = fromRule(input, rule.decision, rule.reason);
         log("info", "classification_rule", {
           domain: input.domain,
-          decision: stored.decision,
+          decision: classification.decision,
           reason: rule.reason,
         });
       } else {
         log("info", "classification_ai_start", { domain: input.domain });
-        const ai = await options.classifier.classify({
+        ai = await options.classifier.classify({
           goal: input.goal.title,
           goalCategory: input.goal.category,
           goalTopics: input.goal.topics,
@@ -89,7 +100,7 @@ export function createClassificationPipeline(options: {
           pageTitle: input.title,
           recentContext: input.recentContext,
         });
-        stored = {
+        classification = {
           browsingEventId: input.eventId,
           decision: toStoredDecision(ai.decision),
           relevant: ai.relevanceScore >= 0.5,
@@ -101,30 +112,30 @@ export function createClassificationPipeline(options: {
         };
         log("info", "classification_stored", {
           domain: input.domain,
-          decision: stored.decision,
+          decision: classification.decision,
           source: "AI",
         });
       }
 
-      await options.classifications.create(stored);
+      await options.classifications.create(classification);
       await options.cache.set({
         userId: input.userId,
         goalId: input.goal.id,
         url: input.url,
         domain: input.domain,
-        decision: stored.decision,
-        category: stored.category,
-        relevanceScore: stored.relevanceScore,
-        relevant: stored.relevant,
-        confidence: stored.confidence,
-        reason: stored.reason,
-        source: stored.source,
+        decision: classification.decision,
+        category: classification.category,
+        relevanceScore: classification.relevanceScore,
+        relevant: classification.relevant,
+        confidence: classification.confidence,
+        reason: classification.reason,
+        source: classification.source,
       });
       log("info", "classification_cached", {
         domain: input.domain,
-        source: stored.source,
+        source: classification.source,
       });
-      return stored;
+      return { classification, rule, ai };
     },
   };
 }
@@ -148,5 +159,21 @@ function fromRule(
     confidence: 1,
     source: "RULE",
     reason,
+  };
+}
+
+function toAiClassification(record: {
+  relevanceScore: number;
+  category: string;
+  decision: StoredClassification["decision"];
+  reason: string | null;
+  confidence: number;
+}): AiClassification {
+  return {
+    relevanceScore: record.relevanceScore,
+    category: record.category as GoalCategory,
+    decision: record.decision.toLowerCase() as AiClassification["decision"],
+    reason: record.reason ?? "Cached classification",
+    confidence: record.confidence,
   };
 }

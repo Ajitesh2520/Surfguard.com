@@ -7,9 +7,9 @@ import type { Plugin } from "vite";
 const dir = dirname(fileURLToPath(import.meta.url));
 const shared = resolve(dir, "../../packages/shared/src/index.ts");
 
-function bundleBackground(): Plugin {
+function bundleWorkers(): Plugin {
   return {
-    name: "bundle-background",
+    name: "bundle-workers",
     async writeBundle() {
       await build({
         configFile: false,
@@ -35,6 +35,26 @@ function bundleBackground(): Plugin {
         },
       });
 
+      await build({
+        configFile: false,
+        logLevel: "error",
+        resolve: {
+          alias: {
+            "@surfguard/shared": shared,
+          },
+        },
+        build: {
+          emptyOutDir: false,
+          outDir: resolve(dir, "dist"),
+          lib: {
+            entry: resolve(dir, "src/content.ts"),
+            formats: ["iife"],
+            name: "surfguardContent",
+            fileName: () => "content.js",
+          },
+        },
+      });
+
       copyFileSync(
         resolve(dir, "manifest.json"),
         resolve(dir, "dist/manifest.json"),
@@ -50,13 +70,14 @@ export default defineConfig({
       "@surfguard/shared": shared,
     },
   },
-  plugins: [bundleBackground()],
+  plugins: [bundleWorkers()],
   build: {
     outDir: "dist",
     emptyOutDir: true,
     rollupOptions: {
       input: {
         popup: resolve(dir, "popup.html"),
+        blocked: resolve(dir, "blocked.html"),
       },
     },
   },

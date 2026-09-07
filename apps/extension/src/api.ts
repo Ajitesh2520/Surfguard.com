@@ -1,6 +1,8 @@
-import type { AuthLoginResponse, BrowserActivityEvent } from "@surfguard/shared";
+import type { AuthLoginResponse, BrowserActivityEvent, InterventionPayload } from "@surfguard/shared";
 import { API_BASE_URL } from "./config";
 import { getSessionToken } from "./auth";
+
+const FETCH_MS = 2500;
 
 export async function login(email: string, password: string): Promise<string> {
   const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
@@ -17,20 +19,28 @@ export async function login(email: string, password: string): Promise<string> {
 
 export async function postActivityEvent(
   event: BrowserActivityEvent,
-): Promise<void> {
+): Promise<InterventionPayload | null> {
   const token = await getSessionToken();
-  if (!token) return;
+  if (!token) return null;
 
-  const response = await fetch(`${API_BASE_URL}/api/events`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(event),
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/events`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(event),
+      signal: AbortSignal.timeout(FETCH_MS),
+    });
 
-  if (!response.ok && response.status !== 429) {
-    throw new Error(`Event ingest failed (${response.status})`);
+    if (!response.ok) return null;
+
+    const body = (await response.json()) as {
+      intervention?: InterventionPayload | null;
+    };
+    return body.intervention ?? null;
+  } catch {
+    return null;
   }
 }
