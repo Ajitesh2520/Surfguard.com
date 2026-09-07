@@ -13,7 +13,12 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   eslintConfigPrettier,
   {
-    files: ["apps/api/**/*.ts", "packages/shared/**/*.ts", "packages/rules/**/*.ts"],
+    files: [
+      "apps/api/**/*.ts",
+      "packages/shared/**/*.ts",
+      "packages/rules/**/*.ts",
+      "packages/decision/**/*.ts",
+    ],
     languageOptions: {
       globals: globals.node,
     },

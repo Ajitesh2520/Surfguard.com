@@ -1,0 +1,21 @@
+{
+  "name": "@surfguard/decision",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/engine.test.ts"
+  },
+  "dependencies": {
+    "@surfguard/rules": "*",
+    "@surfguard/shared": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

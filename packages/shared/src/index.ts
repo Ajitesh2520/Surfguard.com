@@ -65,6 +65,14 @@ export type RuleDecision = (typeof RULE_DECISIONS)[number];
 export const AI_DECISIONS = ["allow", "nudge", "warn", "block"] as const;
 export type AiDecision = (typeof AI_DECISIONS)[number];
 
+export const INTERVENTION_DECISIONS = [
+  "ALLOW",
+  "NUDGE",
+  "WARN",
+  "BLOCK",
+] as const;
+export type InterventionDecision = (typeof INTERVENTION_DECISIONS)[number];
+
 export type AiClassification = {
   relevanceScore: number;
   category: GoalCategory;
