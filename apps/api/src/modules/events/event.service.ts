@@ -208,6 +208,7 @@ async function decideForEvent(
 
   log("info", "intervention_decided", {
     domain: event.domain,
+    category: pipelineResult.classification.category,
     decision: decided.decision,
     source: decided.source,
   });

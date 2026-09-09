@@ -70,6 +70,7 @@ export function createClassificationPipeline(options: {
         await options.classifications.create(classification);
         log("info", "classification_cache_hit", {
           domain: input.domain,
+          category: classification.category,
           decision: classification.decision,
         });
         return {
@@ -86,6 +87,7 @@ export function createClassificationPipeline(options: {
         classification = fromRule(input, rule.decision, rule.reason);
         log("info", "classification_rule", {
           domain: input.domain,
+          category: classification.category,
           decision: classification.decision,
           reason: rule.reason,
         });
@@ -112,6 +114,7 @@ export function createClassificationPipeline(options: {
         };
         log("info", "classification_stored", {
           domain: input.domain,
+          category: classification.category,
           decision: classification.decision,
           source: "AI",
         });
@@ -133,6 +136,8 @@ export function createClassificationPipeline(options: {
       });
       log("info", "classification_cached", {
         domain: input.domain,
+        category: classification.category,
+        decision: classification.decision,
         source: classification.source,
       });
       return { classification, rule, ai };

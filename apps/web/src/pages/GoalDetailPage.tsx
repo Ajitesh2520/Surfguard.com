@@ -36,8 +36,13 @@ export function GoalDetailPage() {
       {goal ? (
         <>
           <div className="page-header">
-            <h1>{goal.title}</h1>
-            <Link to={`/goals/${goal.id}/edit`}>Edit</Link>
+            <div>
+              <p className="eyebrow">Goal</p>
+              <h1>{goal.title}</h1>
+            </div>
+            <Link className="button ghost" to={`/goals/${goal.id}/edit`}>
+              Edit
+            </Link>
           </div>
           <dl className="goal-details">
             <dt>Category</dt>

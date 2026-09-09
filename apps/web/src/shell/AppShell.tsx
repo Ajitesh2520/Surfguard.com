@@ -1,6 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, Navigate, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Navigate, useNavigate } from "react-router-dom";
 import { fetchMe, logout } from "../lib/api";
+import { AmbientBackdrop } from "../ui/AmbientBackdrop";
+import { AnimatedOutlet } from "../ui/AnimatedOutlet";
+
+const NAV = [
+  { to: "/", label: "Home", end: true },
+  { to: "/goals", label: "Goals" },
+  { to: "/sessions", label: "Sessions" },
+  { to: "/activity", label: "Activity" },
+  { to: "/analytics", label: "Analytics" },
+] as const;
 
 export function AppShell() {
   const navigate = useNavigate();
@@ -12,9 +22,13 @@ export function AppShell() {
 
   if (me.isLoading) {
     return (
-      <main>
-        <p>Loading…</p>
-      </main>
+      <>
+        <AmbientBackdrop />
+        <div className="loading-state">
+          <div className="loading-orb" aria-hidden="true" />
+          <p>Loading SurfGuard…</p>
+        </div>
+      </>
     );
   }
 
@@ -29,21 +43,34 @@ export function AppShell() {
 
   return (
     <div className="shell">
+      <AmbientBackdrop />
       <header className="shell-header">
-        <strong>SurfGuard</strong>
-        <nav className="shell-nav">
-          <Link to="/">Home</Link>
-          <Link to="/goals">Goals</Link>
-          <Link to="/sessions">Sessions</Link>
-          <Link to="/activity">Activity</Link>
-          <Link to="/analytics">Analytics</Link>
+        <Link to="/" className="shell-brand">
+          <span className="shell-brand-dot" aria-hidden="true" />
+          SurfGuard
+        </Link>
+        <nav className="shell-nav" aria-label="Primary">
+          {NAV.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={"end" in item ? item.end : false}
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
+              <span>{item.label}</span>
+            </NavLink>
+          ))}
         </nav>
-        <span>{me.data.user.email}</span>
-        <button type="button" onClick={() => void onLogout()}>
-          Log out
-        </button>
+        <div className="shell-user">
+          <span title={me.data.user.email}>{me.data.user.email}</span>
+          <button type="button" onClick={() => void onLogout()}>
+            Log out
+          </button>
+        </div>
       </header>
-      <Outlet />
+      <AnimatedOutlet />
     </div>
   );
 }

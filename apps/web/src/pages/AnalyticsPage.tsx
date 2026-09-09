@@ -3,29 +3,31 @@ import { useState } from "react";
 import type { AnalyticsResponse } from "@surfguard/shared";
 import { fetchAnalytics } from "../lib/api";
 import { formatDrift, formatDuration } from "../lib/analytics-format";
+import { CountUp } from "../ui/CountUp";
+import { Reveal } from "../ui/Reveal";
 
 const RANGES = [1, 7, 30] as const;
 
 function OverviewGrid({ data }: { data: AnalyticsResponse }) {
   const items = [
-    ["Focus time", formatDuration(data.overview.focusTimeMs)],
-    ["Productive", formatDuration(data.overview.productiveTimeMs)],
-    ["Distracted", formatDuration(data.overview.distractedTimeMs)],
-    ["Interventions", String(data.overview.interventions)],
-    ["Blocked", String(data.overview.blockedAttempts)],
-    ["Nudges", String(data.overview.nudges)],
-    ["Context switches", String(data.overview.contextSwitches)],
-    ["Avg drift", formatDrift(data.overview.averageDriftScore)],
-    ["Completed sessions", String(data.overview.completedSessions)],
+    ["Focus time", data.overview.focusTimeMs, formatDuration],
+    ["Productive", data.overview.productiveTimeMs, formatDuration],
+    ["Distracted", data.overview.distractedTimeMs, formatDuration],
+    ["Interventions", data.overview.interventions, (n: number) => String(Math.round(n))],
+    ["Blocked", data.overview.blockedAttempts, (n: number) => String(Math.round(n))],
+    ["Nudges", data.overview.nudges, (n: number) => String(Math.round(n))],
+    ["Context switches", data.overview.contextSwitches, (n: number) => String(Math.round(n))],
+    ["Avg drift", data.overview.averageDriftScore, formatDrift],
+    ["Completed sessions", data.overview.completedSessions, (n: number) => String(Math.round(n))],
   ] as const;
 
   return (
     <ul className="metric-grid">
-      {items.map(([label, value]) => (
-        <li key={label}>
+      {items.map(([label, value, format], index) => (
+        <Reveal as="li" key={label} delayMs={index * 45}>
           <span>{label}</span>
-          <strong>{value}</strong>
-        </li>
+          <CountUp value={value} format={format} />
+        </Reveal>
       ))}
     </ul>
   );
@@ -41,7 +43,10 @@ export function AnalyticsPage() {
   return (
     <main className="analytics-page">
       <div className="page-header">
-        <h1>Analytics</h1>
+        <div>
+          <p className="eyebrow">Insights</p>
+          <h1>Analytics</h1>
+        </div>
         <label>
           Range
           <select

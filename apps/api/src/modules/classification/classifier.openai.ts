@@ -91,8 +91,10 @@ export function createOpenAiClassifier(options?: {
 
         log("info", "classification_ai_result", {
           domain: input.domain,
+          category: parsed.category,
           decision: parsed.decision,
           confidence: parsed.confidence,
+          relevanceScore: parsed.relevanceScore,
         });
         return parsed;
       } catch (error) {

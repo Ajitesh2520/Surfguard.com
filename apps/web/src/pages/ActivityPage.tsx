@@ -9,8 +9,9 @@ export function ActivityPage() {
 
   return (
     <main>
+      <p className="eyebrow">Browse trail</p>
       <h1>Activity</h1>
-      <p>Browsing events stored for your account.</p>
+      <p className="lede">Browsing events stored for your account.</p>
       {events.isLoading ? <p>Loading…</p> : null}
       {events.isError ? (
         <p className="error">

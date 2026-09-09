@@ -19,9 +19,17 @@ export function GoalsPage() {
   return (
     <main>
       <div className="page-header">
-        <h1>Goals</h1>
-        <Link to="/goals/new">Create goal</Link>
+        <div>
+          <p className="eyebrow">Intent</p>
+          <h1>Goals</h1>
+        </div>
+        <Link className="button" to="/goals/new">
+          Create goal
+        </Link>
       </div>
+      <p className="lede">
+        Goals tell SurfGuard what “on track” means during a focus session.
+      </p>
       {goals.isLoading ? <p>Loading…</p> : null}
       {goals.isError ? (
         <p className="error">
@@ -39,9 +47,15 @@ export function GoalsPage() {
             </Link>
             <span>
               {goal.category.replaceAll("_", " ")} ·{" "}
-              {goal.isActive ? "Active" : "Inactive"}
+              {goal.isActive ? (
+                <span className="status-pill">Active</span>
+              ) : (
+                "Inactive"
+              )}
             </span>
-            <Link to={`/goals/${goal.id}/edit`}>Edit</Link>
+            <Link className="button ghost" to={`/goals/${goal.id}/edit`}>
+              Edit
+            </Link>
             <button
               type="button"
               className="danger"

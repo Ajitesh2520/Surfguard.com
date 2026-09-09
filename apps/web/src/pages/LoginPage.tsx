@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login } from "../lib/api";
+import { AmbientBackdrop } from "../ui/AmbientBackdrop";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -24,38 +25,47 @@ export function LoginPage() {
   }
 
   return (
-    <main>
-      <h1>Sign in</h1>
-      <form onSubmit={(event) => void onSubmit(event)}>
-        <label>
-          Email
-          <input
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-          />
-        </label>
-        <label>
-          Password
-          <input
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-            minLength={8}
-          />
-        </label>
-        {error ? <p className="error">{error}</p> : null}
-        <button type="submit" disabled={pending}>
-          {pending ? "Signing in…" : "Sign in"}
-        </button>
-      </form>
-      <p>
-        No account? <Link to="/register">Create one</Link>
-      </p>
-    </main>
+    <>
+      <AmbientBackdrop />
+      <main className="auth-main">
+        <div className="auth-panel auth-panel-enter">
+          <Link to="/" className="brand-mark">
+            SurfGuard
+          </Link>
+          <h1>Sign in</h1>
+          <p className="lede">Pick up where your focus session left off.</p>
+          <form onSubmit={(event) => void onSubmit(event)}>
+            <label>
+              Email
+              <input
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+              />
+            </label>
+            <label>
+              Password
+              <input
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+                minLength={8}
+              />
+            </label>
+            {error ? <p className="error">{error}</p> : null}
+            <button className="button-shine" type="submit" disabled={pending}>
+              {pending ? "Signing in…" : "Sign in"}
+            </button>
+          </form>
+          <p>
+            No account? <Link to="/register">Create one</Link>
+          </p>
+        </div>
+      </main>
+    </>
   );
 }

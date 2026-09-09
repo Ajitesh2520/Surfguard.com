@@ -10,15 +10,18 @@ export function GoalCreatePage() {
 
   return (
     <main>
+      <p className="eyebrow">New intent</p>
       <h1>Create goal</h1>
-      <GoalForm
-        submitLabel="Create goal"
-        onSubmit={async (values) => {
-          const created = await createGoal(formValuesToPayload(values));
-          await queryClient.invalidateQueries({ queryKey: ["goals"] });
-          navigate(`/goals/${created.goal.id}`);
-        }}
-      />
+      <div className="panel">
+        <GoalForm
+          submitLabel="Create goal"
+          onSubmit={async (values) => {
+            const created = await createGoal(formValuesToPayload(values));
+            await queryClient.invalidateQueries({ queryKey: ["goals"] });
+            navigate(`/goals/${created.goal.id}`);
+          }}
+        />
+      </div>
     </main>
   );
 }

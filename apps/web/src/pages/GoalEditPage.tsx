@@ -19,6 +19,7 @@ export function GoalEditPage() {
 
   return (
     <main>
+      <p className="eyebrow">Refine</p>
       <h1>Edit goal</h1>
       {goalQuery.isLoading ? <p>Loading…</p> : null}
       {goalQuery.isError ? (
@@ -29,16 +30,18 @@ export function GoalEditPage() {
         </p>
       ) : null}
       {goal ? (
-        <GoalForm
-          key={goal.id}
-          initial={goalToFormValues(goal)}
-          submitLabel="Save changes"
-          onSubmit={async (values) => {
-            await updateGoal(goal.id, formValuesToPayload(values));
-            await queryClient.invalidateQueries({ queryKey: ["goals"] });
-            navigate(`/goals/${goal.id}`);
-          }}
-        />
+        <div className="panel">
+          <GoalForm
+            key={goal.id}
+            initial={goalToFormValues(goal)}
+            submitLabel="Save changes"
+            onSubmit={async (values) => {
+              await updateGoal(goal.id, formValuesToPayload(values));
+              await queryClient.invalidateQueries({ queryKey: ["goals"] });
+              navigate(`/goals/${goal.id}`);
+            }}
+          />
+        </div>
       ) : null}
     </main>
   );

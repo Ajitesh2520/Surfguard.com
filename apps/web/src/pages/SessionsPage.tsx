@@ -96,17 +96,25 @@ export function SessionsPage() {
 
   return (
     <main>
+      <p className="eyebrow">Live focus</p>
       <h1>Focus session</h1>
+      <p className="lede">
+        While a session is active, the extension classifies pages against your
+        goal.
+      </p>
 
       {activeSession ? (
-        <section>
+        <section className="session-active">
           <p>
             Working on <strong>{goalTitle(activeSession.goalId)}</strong> ·{" "}
-            {activeSession.strictness.replaceAll("_", " ")}
+            <span className="status-pill">
+              {activeSession.strictness.replaceAll("_", " ")}
+            </span>
           </p>
           <SessionTimer session={activeSession} />
           <button
             type="button"
+            className="danger"
             onClick={() => stop.mutate(activeSession.id)}
             disabled={stop.isPending}
           >
@@ -115,6 +123,7 @@ export function SessionsPage() {
         </section>
       ) : (
         <form
+          className="panel"
           onSubmit={(event) => {
             event.preventDefault();
             if (!goalId) {
