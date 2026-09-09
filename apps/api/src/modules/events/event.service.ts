@@ -105,15 +105,25 @@ export function createEventService(
       }
 
       if (analytics) {
-        await analytics.recordIngest({
-          userId,
-          previous,
-          current: event,
-          goalTitle,
-          decision: intervention?.decision ?? null,
-          reason: intervention?.reason ?? null,
-          driftScore,
-        });
+        // Do not block the extension on analytics writes; slow Neon made
+        // interventions arrive after the client had already timed out.
+        void analytics
+          .recordIngest({
+            userId,
+            previous,
+            current: event,
+            goalTitle,
+            decision: intervention?.decision ?? null,
+            reason: intervention?.reason ?? null,
+            driftScore,
+          })
+          .catch((error) => {
+            log("error", "analytics_ingest_failed", {
+              userId,
+              domain: event.domain,
+              message: error instanceof Error ? error.message : "unknown",
+            });
+          });
       }
 
       return { event: toPublicEvent(event), intervention };

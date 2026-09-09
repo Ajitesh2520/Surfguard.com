@@ -2,7 +2,8 @@ import type { AuthLoginResponse, BrowserActivityEvent, InterventionPayload } fro
 import { API_BASE_URL } from "./config";
 import { getSessionToken } from "./auth";
 
-const FETCH_MS = 2500;
+// Neon + classification often take 5–10s; aborting early drops every intervention.
+const FETCH_MS = 15_000;
 
 export async function login(email: string, password: string): Promise<string> {
   const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
@@ -34,13 +35,17 @@ export async function postActivityEvent(
       signal: AbortSignal.timeout(FETCH_MS),
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.warn("SurfGuard event rejected", response.status);
+      return null;
+    }
 
     const body = (await response.json()) as {
       intervention?: InterventionPayload | null;
     };
     return body.intervention ?? null;
-  } catch {
+  } catch (error) {
+    console.warn("SurfGuard event request failed", error);
     return null;
   }
 }

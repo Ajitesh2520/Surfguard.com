@@ -1,13 +1,25 @@
+# Copy to apps/api/.env
+
 PORT=4001
-DATABASE_URL=postgresql://surfguard:surfguard@localhost:5432/surfguard?schema=public
 WEB_ORIGIN=http://localhost:5173
 AUTH_COOKIE_NAME=surfguard_session
 COOKIE_SECURE=false
 SESSION_TTL_MS=604800000
 BCRYPT_COST=12
 EVENTS_RATE_LIMIT=60
+
+# Required. Pick ONE:
+
+# A) Local Docker (install Docker Desktop, then:
+#    docker compose -f infrastructure/docker-compose.yml up -d)
+DATABASE_URL=postgresql://surfguard:surfguard@localhost:5432/surfguard?schema=public
+
+# B) Free hosted Postgres (Neon: https://console.neon.tech — no Docker needed)
+# Replace USER, PASSWORD, HOST. Keep sslmode=require.
+# DATABASE_URL=postgresql://USER:PASSWORD@HOST/neondb?sslmode=require&schema=public
+
+# Optional. Empty = YouTube gets a fallback nudge. Set a key for real AI.
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-4o-mini
 OPENAI_TIMEOUT_MS=8000
 OPENAI_BASE_URL=https://api.openai.com/v1
-

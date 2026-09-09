@@ -95,36 +95,55 @@ async function record(event: BrowserActivityEvent) {
   ) {
     return;
   }
-  lastApplied.set(event.tabId, { url: event.url, at: Date.now() });
 
   try {
-    await applyIntervention(event.tabId, intervention);
-  } catch {
+    const applied = await applyIntervention(event.tabId, intervention);
+    if (applied) {
+      lastApplied.set(event.tabId, { url: event.url, at: Date.now() });
+    }
+  } catch (error) {
     // Fail open: never interrupt browsing if UI cannot be shown.
+    console.warn("SurfGuard intervention failed", error);
   }
 }
 
 async function applyIntervention(
   tabId: number,
   intervention: InterventionPayload,
-) {
+): Promise<boolean> {
   if (intervention.decision === "BLOCK") {
     await chrome.storage.session.set({ [`block:${tabId}`]: intervention });
     const blocked = chrome.runtime.getURL(
       `blocked.html?tab=${encodeURIComponent(String(tabId))}`,
     );
     await chrome.tabs.update(tabId, { url: blocked });
-    return;
+    return true;
   }
 
-  await chrome.tabs.sendMessage(
+  // Content script may not be ready on the first navigation event; retry once.
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      await chrome.tabs.sendMessage(tabId, {
+        type: SHOW_INTERVENTION,
+        intervention,
+      });
+      return true;
+    } catch {
+      if (attempt === 0) {
+        await delay(400);
+      }
+    }
+  }
+
+  console.warn("SurfGuard content script missing; refresh the tab", {
     tabId,
-    {
-      type: SHOW_INTERVENTION,
-      intervention,
-    },
-    () => {
-      void chrome.runtime.lastError;
-    },
-  );
+    decision: intervention.decision,
+  });
+  return false;
+}
+
+function delay(ms: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }

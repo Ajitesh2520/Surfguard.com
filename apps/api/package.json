@@ -10,6 +10,7 @@
     "test": "tsx --test test/auth.http.test.ts test/goals.http.test.ts test/sessions.http.test.ts test/events.http.test.ts test/analytics.http.test.ts test/classifier.test.ts test/classification.pipeline.test.ts",
     "db:validate": "prisma validate",
     "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:generate": "prisma generate"
   },
